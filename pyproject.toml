@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "medibot"
+version = "0.1.0"
+description = "medibot using crewAI"
+authors = ["Mai Tram maihoangbichtram@gmail.com"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<=3.13"
+crewai = { extras = ["tools"], version = "^0.35.8" }
+crewai-tools = "^0.4.6"
+pip = "^24.1.1"
+tools = "^0.1.9"
+
+[tool.poetry.scripts]
+medibot = "medibot.main:run"
+train = "medibot.main:train"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
