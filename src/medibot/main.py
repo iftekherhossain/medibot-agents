@@ -11,8 +11,8 @@ def run():
     }
     # Replace with your inputs, it will automatically interpolate any tasks and agents information
     result = MedibotCrew().crew().kickoff(inputs=inputs)
-    print("######################")
-    print(result)
+    #print("######################")
+    #print(result)
 
 
 def train():

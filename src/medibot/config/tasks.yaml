@@ -2,18 +2,17 @@ general_practitioner_task:
   description: >
     Conduct research about health issues to figure out what is going on with the patient.
     Ask the patient more questions if needed to find about their current health, pain.
-    Help the patient get an appointment with a doctor as soon as possible if an appointment is needed.
+    Consider if an appointment with a doctor is urgently needed or the patient can rest at home.
     
     Patient's initial description about how they are now: {initial_con}
   expected_output: >
-    Diagnose about the patient's condition.
-    Some advice for the patient's health to be better if the condition can be taken care at home.
-    Questions if more info from the patient is needed.
-    If the patient needs to see a doctor, tell agent clinic_appointment_maker to help set up an appointment.
+    Comprehensive message to the patient, which includes diagnoses and advices, and also whether the patient to see the doctor urgently.
 
 clinic_appointment_maker_task:
   description: >
-    Tell the patient advices from 'General practitioner', then ask if they need further checkup with the doctor for now.
-    If the patient wants further checkup, ask the patient 'Hey when is the best time for the appointment?' and update the preferable time slot of the patient.
+    Based on the pre-assessment of General practitioner, check if the patient needs to see doctor urgently, if yes, help the patient schedule an appointment with the doctor by asking politely and friendly their preferable time to visit the clinic.
   expected_output: >
-    If the patient wants to see the doctor, ask questions and then say 'thank you' and a message to tell the patient that a doctor will call to set up the appointment soon.
+    If the patient provides their time for doctor appointment, say 'thank you' and a message to tell the patient that a doctor will call to set up the appointment soon.
+    Send the patient wishes.
+    
+

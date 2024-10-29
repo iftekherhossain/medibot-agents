@@ -21,6 +21,6 @@ class AppointmentTool(BaseTool):
 
     def _run(self, argument: str = '', string: str = '') -> str:
         print("########")
+        if string: print(string)
         if argument: res = input(f"{argument} \n")
-        if string: res = input(f"{string} \n")
         return res
