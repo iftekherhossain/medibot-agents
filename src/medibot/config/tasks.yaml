@@ -1,12 +1,30 @@
 general_practitioner_task:
   description: >
-    Conduct research about health issues to figure out what is going on with the patient.
-    Ask the patient more questions if needed to find about their current health, pain.
-    Consider if an appointment with a doctor is urgently needed or the patient can rest at home.
-    
+    Communicate with the patient to gather complaints, symptoms and signs to determine which disease or condition the patient is dealing with.
     Patient's initial description about how they are now: {initial_con}
+#    But in cases of open wounds reported, before asking further questions, take a close look at them with your EyeTool, and try to interpret the wounds in rounded boxes as much as you can, like size, whether it's swelling or deep before the actual interview.
+#    Conduct research about health issues to figure out what is going on with the patient.
+#    Ask the patient more questions if needed to find about their current health, pain.
+#    Consider if an appointment with a doctor is urgently needed or the patient can rest at home.
   expected_output: >
-    Comprehensive message to the patient, which includes diagnoses and advices, and also whether the patient to see the doctor urgently.
+    You must respond with a dictionary of extracted information in the following format: ['interview_summary':  which is the detailed summary of the patient's input, 'diagnoses': which are the diagnoses based on your medical knowledge]
+    The response should contain ONLY the dictionary.
+#    Comprehensive message to the patient, which includes diagnoses and advices, and also whether the patient to see the doctor urgently.
+
+personal_info_collector:
+  description: >
+    Run the EyeTool to extract text from some image.
+  expected_output: >
+    Text from the given image.
+
+personal_info_collector_sub:
+  description: >
+    Run the EyeTool to turn on the camera to see the patient's id card. After 10 seconds, capture the id card.
+    Based on the recently captured id card 'id-card2.png', extract text and identify names and id number of the patient.
+    Ensure that the extracted text is accurate and complete as these info are important to identify the patient.
+  expected_output: >
+    The copied image to 'copy.png'
+    A list that includes name, id number of the patient.
 
 clinic_appointment_maker_task:
   description: >
