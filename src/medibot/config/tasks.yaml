@@ -2,6 +2,7 @@ general_practitioner_task:
   description: >
     Communicate with the patient to gather complaints, symptoms and signs to determine which disease or condition the patient is dealing with.
     Patient's initial description about how they are now: {initial_con}
+#    Use SpeakingTool tool in every interaction
 #    But in cases of open wounds reported, before asking further questions, take a close look at them with your EyeTool, and try to interpret the wounds in rounded boxes as much as you can, like size, whether it's swelling or deep before the actual interview.
 #    Conduct research about health issues to figure out what is going on with the patient.
 #    Ask the patient more questions if needed to find about their current health, pain.
@@ -10,6 +11,12 @@ general_practitioner_task:
     You must respond with a dictionary of extracted information in the following format: ['interview_summary':  which is the detailed summary of the patient's input, 'diagnoses': which are the diagnoses based on your medical knowledge, 'doctor_checkup_needed':boolean (wheather further doctor checkup required or not)]
     The response should contain ONLY the dictionary.
     Comprehensive message to the patient, which includes diagnoses and advices, and also whether the patient to see the doctor urgently.
+
+pose_checking_task:
+  description: >
+    Tell user that after 10 second a picture will captured then wait 10 seconds and use PoseCheck tool.
+  expected_output: >
+    True or False. True means good pose
 
 appointment_scheduling_task:
   description: >

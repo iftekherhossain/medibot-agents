@@ -17,6 +17,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 ##
+import cv2
+import time 
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+##
+import pyttsx3
 
 class HumanTool(BaseTool):
     name: str = "Human interact"
@@ -26,7 +33,103 @@ class HumanTool(BaseTool):
 
     def _run(self, argument: str) -> str:
         print("########")
+        engine = pyttsx3.init()
+        # engine._driver._proxy = engine._driver._proxy
+        engine.setProperty('rate', 150)  # Adjust speech speed
+        engine.setProperty('volume', 0.9)  # Set volume (0.0 to 1.0)
+        engine.say(argument)
+        engine.runAndWait()
+        engine.stop()
         res = input(f"{argument} \n")
+        
+        return res
+
+class SpeakingTool(BaseTool):
+    name: str = "Text to Speach"
+    description: str = (
+        "Speak what is written to the patient"
+    )
+
+    def _run(self, argument: str):
+        engine = pyttsx3.init()
+        # engine._driver._proxy = engine._driver._proxy
+        # engine.setProperty('rate', 150)  # Adjust speech speed
+        # engine.setProperty('volume', 0.9)  # Set volume (0.0 to 1.0)
+        engine.say(argument)
+        engine.runAndWait()
+        # return res
+
+
+class PoseCheck(BaseTool):
+    name: str = "Check Pose"
+    description: str = (
+        "Check wheather the pose is good or not"
+    )
+    def angle_between_lines(self,A, B, C, D):
+        v1x, v1y = B[0] - A[0], B[1] - A[1]
+        v2x, v2y = D[0] - C[0], D[1] - C[1]
+        
+        
+        dot_product = v1x * v2x + v1y * v2y
+        magnitude_v1 = math.sqrt(v1x**2 + v1y**2)
+        magnitude_v2 = math.sqrt(v2x**2 + v2y**2)
+        
+        cos_theta = dot_product / (magnitude_v1 * magnitude_v2)
+        
+        theta_radians = math.acos(cos_theta)
+        theta_degrees = math.degrees(theta_radians)
+        
+        return theta_degrees
+    
+    def pose_check(self):
+        time.sleep(10)
+        try:
+            body_parts = {
+                    "Nose": 0,
+                    "Left Eye": 1,
+                    "Right Eye": 2,
+                    "Left Ear": 3,
+                    "Right Ear": 4,
+                    "Left Shoulder": 5,
+                    "Right Shoulder": 6,
+                    "Left Elbow": 7,
+                    "Right Elbow": 8,
+                    "Left Wrist": 9,
+                    "Right Wrist": 10,
+                    "Left Hip": 11,
+                    "Right Hip": 12,
+                    "Left Knee": 13,
+                    "Right Knee": 14,
+                    "Left Ankle": 15,
+                    "Right Ankle": 16
+                }
+            filename = "pose_image.png"
+            cam = cv2.VideoCapture(0) 
+            result, image = cam.read()
+            
+            if result:
+                cv2.imwrite(filename,image)
+                image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+                model = YOLO('yolov8l-pose.pt')
+                results = model(filename,save=False)
+                res_list = results[0].keypoints.data.tolist()[0]
+                res_list = [list(map(int,l)) for l in res_list]
+                direction = "Left" if res_list[body_parts["Right Shoulder"]][0] > res_list[body_parts["Nose"]][0] else "Right"
+                A = res_list[body_parts[f"{direction} Hip"]]
+                B = res_list[body_parts[f"{direction} Shoulder"]]
+                C = res_list[body_parts[f"{direction} Ear"]]
+                angle = self.angle_between_lines((0,350),(0,0),B,C)
+                print("ANGGGGGGGGGGGGGGGGGGGGGLEEEEEEEEEEEEEEEEEEEEEEEE",angle)
+                if angle<15:
+                    return True
+                else:
+                    return False
+        except:
+            return "An error occured"
+
+    def _run(self):
+        print("########")
+        res = self.pose_check()
         return res
 
 class AvailableSlot(BaseTool):
