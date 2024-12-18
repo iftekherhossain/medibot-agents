@@ -1,12 +1,12 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from crewai_tools import SerperDevTool, ScrapeWebsiteTool, VisionTool
+from crewai_tools import SerperDevTool#, ScrapeWebsiteTool, VisionTool
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from medibot.tools.custom_tool import HumanTool, AppointmentTool, EyeTool
+from medibot.tools.custom_tool import HumanTool, AvailableSlot, BookSlot, PoseCheck, SpeakingTool, TremorCheck, EyeTool
 from pydantic import BaseModel, Field
 from crewai.tasks.task_output import TaskOutput
-from crewai.tasks.conditional_task import ConditionalTask
+# from crewai.tasks.conditional_task import ConditionalTask
 import requests
 import json
 
@@ -24,7 +24,7 @@ class Preassessment(BaseModel):
     #message_to_patient: str = Field(..., description="Comprehensive message to the patient")
     interview_summary: str = Field(..., description="the detailed summary of the patient's input")
     diagnoses: str = Field(..., description="The diagnoses based on your medical knowledge")
-    #doctor_checkup_needed: bool = Field(..., description="whether the patient to see the doctor urgently")
+    doctor_checkup_needed: bool = Field(..., description="whether the patient to see the doctor urgently")
 
 def general_practitioner_task_callback(output: TaskOutput):
     # Do something after the task is completed
@@ -32,18 +32,18 @@ def general_practitioner_task_callback(output: TaskOutput):
     print('###Output###')
     print(output)
     print('###Output raw###')
-    print(output.raw)
-    print(type(output.raw))
+    # print(output.raw)
+    # print(type(output.raw))
     # print(output.interview_summary)
     #print(output.raw.interview_summary)
     #print(json.loads(output.raw).get('interview_summary'))
-    print(output.pydantic.interview_summary)
+    # print(output)
 
-    data = {'patient_id': '160900AAgent', 'description': str(output.pydantic.interview_summary), 'pre_assessment': str(output.pydantic.diagnoses)}
-    headers = {'Content-Type': 'application/json'}
+    # data = {'patient_id': '160900AAgent', 'description': str(output.pydantic.interview_summary), 'pre_assessment': str(output.pydantic.diagnoses)}
+    # headers = {'Content-Type': 'application/json'}
 
-    response = requests.post('https://main-bvxea6i-5gtrd4rbck7xm.eu-5.platformsh.site/add-request', data=json.dumps(data), headers=headers)
-    print(response.text)
+    # response = requests.post('https://main-bvxea6i-5gtrd4rbck7xm.eu-5.platformsh.site/add-request', data=json.dumps(data), headers=headers)
+    # print(response.text)
 
 @CrewBase
 class MedibotCrew():
@@ -55,7 +55,38 @@ class MedibotCrew():
         return Agent(
             config=self.agents_config['general_practitioner'],
             #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
-            tools=[SerperDevTool(), HumanTool()], # Example of custom tool, loaded at the beginning of file
+            tools=[SerperDevTool(), HumanTool(),SpeakingTool()], # Example of custom tool, loaded at the beginning of file
+            verbose=True,
+            allow_delegation=True,
+        )
+    
+    @agent
+    def pose_checker(self) -> Agent:
+        return Agent(
+            config=self.agents_config['pose_checker'],
+            #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
+            tools=[PoseCheck()], # Example of custom tool, loaded at the beginning of file
+            verbose=True,
+            allow_delegation=True
+        )
+    
+    @agent
+    def tremor_checker(self) -> Agent:
+        return Agent(
+            config=self.agents_config['tremor_checker'],
+            #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
+            tools=[TremorCheck()], # Example of custom tool, loaded at the beginning of file
+            verbose=True,
+            allow_delegation=True
+        )
+    
+    
+    @agent
+    def appointment_scheduler(self) -> Agent:
+        return Agent(
+            config=self.agents_config['appointment_scheduler'],
+            #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
+            tools=[SerperDevTool(), HumanTool(),AvailableSlot(),BookSlot()], # Example of custom tool, loaded at the beginning of file
             verbose=True,
             allow_delegation=False,
         )
@@ -87,6 +118,29 @@ class MedibotCrew():
             agent=self.general_practitioner(),
             output_pydantic=Preassessment,
             callback=general_practitioner_task_callback,
+            # human_input=True
+        )
+        
+    @task
+    def pose_checking_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['pose_checking_task'],
+            agent=self.pose_checker(),
+        )
+        
+    @task
+    def tremor_checking_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['tremor_checking_task'],
+            agent=self.tremor_checker(),
+        )
+    
+    @task
+    def appointment_scheduling_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['appointment_scheduling_task'],
+            agent=self.appointment_scheduler(),
+            condition=is_doctor_checkup_needed
             # human_input=True
         )
 

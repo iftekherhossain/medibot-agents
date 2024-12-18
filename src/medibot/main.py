@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 from medibot.crew import MedibotCrew
+from medibot.tools import custom_tool
 
 
 def run():
