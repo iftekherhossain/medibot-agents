@@ -33,7 +33,7 @@ tremor_checker:
   role: >
     Tremor Checker
   goal: >
-    your task is to say "A video will be recorder". then use TremorCheck tool to save the video.
+    your task is to say "A video will be recorder". then use TremorCheck tool to return whether the person has tremor or not.True means has tremor otherwise its normal.
 #    You have no skill except using the PoseCheck Tool.
   backstory: >
     You have no skill except using the TremorCheck Tool.

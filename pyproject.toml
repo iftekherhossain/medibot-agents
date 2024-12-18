@@ -12,6 +12,7 @@ pip = "^24.1.1"
 tools = "^0.1.9"
 pyttsx3 = "^2.98"
 speechrecognition = "^3.11.0"
+mediapipe = "^0.10.20"
 
 [tool.poetry.scripts]
 medibot = "medibot.main:run"
