@@ -3,7 +3,7 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import SerperDevTool#, ScrapeWebsiteTool, VisionTool
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from medibot.tools.custom_tool import HumanTool, AvailableSlot, BookSlot, PoseCheck, SpeakingTool, EyeTool
+from medibot.tools.custom_tool import HumanTool, AvailableSlot, BookSlot, PoseCheck, SpeakingTool, TremorCheck, EyeTool
 from pydantic import BaseModel, Field
 from crewai.tasks.task_output import TaskOutput
 # from crewai.tasks.conditional_task import ConditionalTask
@@ -67,19 +67,29 @@ class MedibotCrew():
             #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
             tools=[PoseCheck()], # Example of custom tool, loaded at the beginning of file
             verbose=True,
-            allow_delegation=False
+            allow_delegation=True
+        )
+    
+    @agent
+    def tremor_checker(self) -> Agent:
+        return Agent(
+            config=self.agents_config['tremor_checker'],
+            #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
+            tools=[TremorCheck()], # Example of custom tool, loaded at the beginning of file
+            verbose=True,
+            allow_delegation=True
         )
     
     
-    # @agent
-    # def appointment_scheduler(self) -> Agent:
-    #     return Agent(
-    #         config=self.agents_config['appointment_scheduler'],
-    #         #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
-    #         tools=[SerperDevTool(), HumanTool(),AvailableSlot(),BookSlot()], # Example of custom tool, loaded at the beginning of file
-    #         verbose=True,
-    #         allow_delegation=False,
-    #     )
+    @agent
+    def appointment_scheduler(self) -> Agent:
+        return Agent(
+            config=self.agents_config['appointment_scheduler'],
+            #tools=[SerperDevTool(), VisionTool(), HumanTool(), EyeTool()], # Example of custom tool, loaded at the beginning of file
+            tools=[SerperDevTool(), HumanTool(),AvailableSlot(),BookSlot()], # Example of custom tool, loaded at the beginning of file
+            verbose=True,
+            allow_delegation=False,
+        )
 
     '''@agent
     def clinic_receptionist(self) -> Agent:
@@ -117,15 +127,22 @@ class MedibotCrew():
             config=self.tasks_config['pose_checking_task'],
             agent=self.pose_checker(),
         )
+        
+    @task
+    def tremor_checking_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['tremor_checking_task'],
+            agent=self.tremor_checker(),
+        )
     
-    # @task
-    # def appointment_scheduling_task(self) -> Task:
-    #     return Task(
-    #         config=self.tasks_config['appointment_scheduling_task'],
-    #         agent=self.appointment_scheduler(),
-    #         condition=is_doctor_checkup_needed
-    #         # human_input=True
-    #     )
+    @task
+    def appointment_scheduling_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['appointment_scheduling_task'],
+            agent=self.appointment_scheduler(),
+            condition=is_doctor_checkup_needed
+            # human_input=True
+        )
 
     '''@task
     def clinic_appointment_maker_task(self) -> ConditionalTask:

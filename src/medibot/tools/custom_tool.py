@@ -24,6 +24,7 @@ import numpy as np
 from PIL import Image
 ##
 import pyttsx3
+import speech_recognition as sr
 
 class HumanTool(BaseTool):
     name: str = "Human interact"
@@ -33,15 +34,7 @@ class HumanTool(BaseTool):
 
     def _run(self, argument: str) -> str:
         print("########")
-        engine = pyttsx3.init()
-        # engine._driver._proxy = engine._driver._proxy
-        engine.setProperty('rate', 150)  # Adjust speech speed
-        engine.setProperty('volume', 0.9)  # Set volume (0.0 to 1.0)
-        engine.say(argument)
-        engine.runAndWait()
-        engine.stop()
         res = input(f"{argument} \n")
-        
         return res
 
 class SpeakingTool(BaseTool):
@@ -53,12 +46,97 @@ class SpeakingTool(BaseTool):
     def _run(self, argument: str):
         engine = pyttsx3.init()
         # engine._driver._proxy = engine._driver._proxy
-        # engine.setProperty('rate', 150)  # Adjust speech speed
-        # engine.setProperty('volume', 0.9)  # Set volume (0.0 to 1.0)
+        engine.setProperty('rate', 150)  # Adjust speech speed
+        engine.setProperty('volume', 0.9)  # Set volume (0.0 to 1.0)
         engine.say(argument)
         engine.runAndWait()
+        engine.stop()
         # return res
 
+class TremorCheck(BaseTool):
+    name: str = "Check Tremor"
+    description: str = (
+        "capture videos for 10 seconds and save it"
+    )
+    def count_direction_changes(self,values, threshold):
+        # Initialize variables
+        direction_changes = 0
+        current_direction = None  # Track current direction, either "up" or "down"
+
+        # Loop through each pair of consecutive values
+        for i in range(1, len(values)):
+            # Calculate the difference between consecutive values
+            diff = values[i] - values[i - 1]
+            if abs(diff) >= threshold:
+                # Determine the direction: "up" or "down"
+                if diff > 0:
+                    new_direction = "up"
+                elif diff < 0:
+                    new_direction = "down"
+                else:
+                    new_direction = None  
+
+                # Count change in direction
+                if current_direction and new_direction and current_direction != new_direction:
+                    direction_changes += 1
+
+                # Update the current direction
+                current_direction = new_direction
+
+        return direction_changes
+    
+    def record_video(self,output_file='output.avi', duration=10, fps=20, resolution=(640, 480)):
+        # Initialize the webcam
+        cap = cv2.VideoCapture(0)  # 0 is the default webcam
+        if not cap.isOpened():
+            print("Error: Could not open webcam.")
+            return
+
+        # Set the resolution
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
+
+        # Define the codec and create VideoWriter object
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Codec for .avi files
+        out = cv2.VideoWriter(output_file, fourcc, fps, resolution)
+
+        # Start recording
+        print("Recording...")
+        start_time = time.time()
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("Error: Could not read frame.")
+                break
+
+            # Write the frame to the output file
+            out.write(frame)
+
+            # Display the frame (optional)
+            cv2.imshow('Recording', frame)
+
+            # Break the loop after the specified duration
+            if time.time() - start_time > duration:
+                print("Recording complete.")
+                break
+
+            # Press 'q' to stop recording manually
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                print("Recording stopped by user.")
+                break
+
+        # Release resources
+        cap.release()
+        out.release()
+        cv2.destroyAllWindows()
+        return True
+
+    
+    def _run(self):
+        print("########")
+        res = self.record_video()
+        return res
 
 class PoseCheck(BaseTool):
     name: str = "Check Pose"

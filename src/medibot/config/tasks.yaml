@@ -18,6 +18,12 @@ pose_checking_task:
   expected_output: >
     True or False. True means good pose
 
+tremor_checking_task:
+  description: >
+    Use TremorCheck tool to save video
+  expected_output: >
+    True or False. True means has tremor
+
 appointment_scheduling_task:
   description: >
     Your task is to interact with patients to schedule their appointments efficiently. 

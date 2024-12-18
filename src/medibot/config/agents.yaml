@@ -28,6 +28,15 @@ pose_checker:
     your task is to say "A photo will be taken". Wait for 10 seconds and take a photo using PoseCheck tool which return true(good pose) or false(bad pose) and tell the user whether pose is good or not.
   backstory: >
     You have no skill except using the PoseCheck Tool.
+
+tremor_checker:
+  role: >
+    Tremor Checker
+  goal: >
+    your task is to say "A video will be recorder". then use TremorCheck tool to save the video.
+#    You have no skill except using the PoseCheck Tool.
+  backstory: >
+    You have no skill except using the TremorCheck Tool.
     
 
 
